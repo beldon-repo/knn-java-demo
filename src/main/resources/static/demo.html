@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>磨途歌画板测试</title>
+</head>
+<body>
+<canvas id="can" width="320" height="320" style="border:1px solid black">Canvas画板</canvas>
+<span><span id="data"></span></span>
+<div>
+    <button id="submit">提交</button>
+    <button id="reset">重置</button>
+</div>
+
+<script src="./jquery.min.js"></script>
+<script>
+    var canvas = $('#can'),//获取canvas元素
+        pan = canvas[0].getContext("2d"),//获取2D图像API接口
+        paint = false,//鼠标左键是否在画板区域按下
+        x,
+        y;
+    pan.strokeStyle = "#000000";//设置画笔颜色
+    pan.lineJoin = "round";//设置画笔轨迹基于圆点拼接
+    pan.lineWidth = 32;//设置画笔粗细
+
+    //监控画板上的鼠标左键按下
+    canvas.mousedown(function (e) {
+        paint = true;
+        x = e.offsetX;
+        y = e.offsetY;
+        pan.beginPath();
+        pan.moveTo(x, y);
+    });
+    //移动鼠标
+    canvas.mousemove(function (e) {
+        if (paint) {
+            var nx = e.offsetX,
+                ny = e.offsetY;
+            pan.lineTo(x, y);
+            pan.stroke();
+            x = nx;
+            y = ny;
+        }
+    });
+    //释放鼠标左键
+    canvas.mouseup(function (e) {
+        paint = false;
+    });
+    //鼠标离开画板
+    canvas.mouseleave(function (e) {
+        paint = false;
+    });
+
+    $('#reset').click(function () {
+        window.location.reload();
+    });
+
+    $('#submit').click(function () {
+        var data = canvas[0].toDataURL("image/png");//把canvas画板上的内容转成指定格式图片数据，并进行Base64编码
+        console.log(data);
+        $.ajax({
+            url: "/uploadBase64",
+            data: {image: data},
+            type: "post",
+            success: function (data) {
+                console.log(data);
+                $('#data').html("")
+                for (i = 0; i < data.length; i++) {
+                    var obj = data[i];
+                    console.log(obj);
+                    var d = "数字可能是：" + obj.num + "；距离" + parseFloat(obj.distance).toFixed(4);
+
+                    $('#data').append('<div>' + d + '</div>')
+                }
+                // $('#data').html(data)
+            }
+        });
+    });
+
+    // //提交数据处理
+    // $('form').submit(function () {
+    //     var data = canvas[0].toDataURL("image/png");//把canvas画板上的内容转成指定格式图片数据，并进行Base64编码
+    //     $('input').val(data);
+    // });
+</script>
+</body>
+</html>

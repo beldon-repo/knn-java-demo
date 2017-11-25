@@ -1,7 +1,7 @@
 package me.beldon.knn;
 
-import org.apache.commons.math3.linear.BlockRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @author Beldon
@@ -9,13 +9,14 @@ import org.apache.commons.math3.linear.RealMatrix;
  * https://beldon.me/
  */
 public class TestClas {
-    public static void main(String[] args) {
-        RealMatrix trainingMat = new BlockRealMatrix(2, 2);
-        trainingMat.setRow(0, new double[]{1, 2});
-        trainingMat.setRow(1, new double[]{3, 4});
-        System.out.println(trainingMat.toString());
-        System.out.println(trainingMat.getRowVector(0).getNorm());
-
-        System.out.println(Math.sqrt(17D));
+    public static void main(String[] args) throws Exception {
+        String[] fileNames = Paths.get("samples/testDigits/").toFile().list();
+        for (int i = 0; i < fileNames.length; i++) {
+            String fileName = fileNames[i];
+            String fileNameStr = fileName.split("\\.")[0];
+            String classNumStr = fileNameStr.split("_")[0];
+            String targetFileName = classNumStr + "_ab" + i + ".txt";
+            Files.copy(Paths.get("samples/testDigits/", fileName), Paths.get("samples/set/", targetFileName));
+        }
     }
 }
